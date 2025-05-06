@@ -1,5 +1,4 @@
-# template-terraform
-Template repository for all terraform module repositories
+# terraform azure linux Vm 
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
@@ -55,3 +54,66 @@ No modules.
 | <a name="output_vm_private_ip"></a> [vm\_private\_ip](#output\_vm\_private\_ip) | The private IP address assigned to the VM's network interface |
 | <a name="output_vm_public_ip"></a> [vm\_public\_ip](#output\_vm\_public\_ip) | The public IP address assigned to the VM (null if not created) |
 <!-- END_TF_DOCS -->
+
+## Usage
+
+```tf
+
+name                = "linux-vm-prod"
+location            = "East US"
+resource_group_name = "rg-prod-compute"
+subnet_id           = "/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/rg-network/providers/Microsoft.Network/virtualNetworks/vnet-prod/subnets/default"
+
+admin_username                  = "azureuser"
+admin_password                  = "SuperSecurePassword123!"  # only required if password auth is enabled
+disable_password_authentication = true
+ssh_public_key                 = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQD..."
+
+vm_size = "Standard_B2s"
+
+create_public_ip = true
+enable_accelerated_networking = false
+
+private_ip_allocation = "Dynamic"
+public_ip_allocation  = "Dynamic"
+public_ip_sku          = "Basic"
+
+image = {
+  publisher = "Canonical"
+  offer     = "0001-com-ubuntu-server-focal"
+  sku       = "20_04-lts-gen2"
+  version   = "latest"
+}
+
+os_disk = {
+  caching                   = "ReadWrite"
+  storage_account_type      = "Standard_LRS"
+  disk_encryption_set_id    = null
+  write_accelerator_enabled = false
+}
+
+identity = {
+  type         = "SystemAssigned"
+  identity_ids = null
+}
+
+availability_zone = 1
+
+custom_data = null
+user_data   = null
+
+boot_diagnostics_storage_uri = null
+
+provision_vm_agent         = true
+allow_extension_operations = true
+encryption_at_host_enabled = false
+
+custom_script_command = "sudo apt-get update && sudo apt-get install -y nginx"
+
+tags = {
+  environment = "production"
+  project     = "web-frontend"
+  owner       = "devops-team"
+}
+
+```
