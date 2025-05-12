@@ -86,3 +86,31 @@ resource "azurerm_virtual_machine_extension" "custom_script" {
   })
 }
 
+resource "azurerm_monitor_diagnostic_setting" "linux_vm" {
+  count              = var.enable_diagnostics ? 1 : 0
+  name               = "${var.name}-diagnostic"
+  target_resource_id = azurerm_linux_virtual_machine.linux_vm.id
+
+  storage_account_id             = local.storage_id
+  log_analytics_workspace_id     = local.log_analytics_id
+  log_analytics_destination_type = local.log_analytics_destination_type
+  eventhub_authorization_rule_id = local.eventhub_authorization_rule_id
+  eventhub_name                  = local.eventhub_name
+
+  dynamic "enabled_log" {
+    for_each = local.log_categories
+
+    content {
+      category = enabled_log.value
+    }
+  }
+
+  dynamic "metric" {
+    for_each = local.metrics
+
+    content {
+      category = metric.key
+      enabled  = metric.value.enabled
+    }
+  }
+}
