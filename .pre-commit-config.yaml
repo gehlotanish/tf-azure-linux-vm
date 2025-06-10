@@ -1,6 +1,13 @@
 repos:
+  - repo: https://github.com/bridgecrewio/checkov.git
+    rev: '3.2.427'
+    hooks:
+      - id: checkov
+        files: \.tf$
+        entry: checkov -d . --framework terraform --skip-check CKV_AZURE_119,CKV_AZURE_50
+
   - repo: https://github.com/antonbabenko/pre-commit-terraform
-    rev: v1.88.4
+    rev: v1.99.0
     hooks:
       - id: terraform_fmt
       - id: terraform_validate
@@ -24,7 +31,7 @@ repos:
         - --args=--only=terraform_required_providers
         - --args=--only=terraform_workspace_remote
   - repo: https://github.com/commitizen-tools/commitizen
-    rev: v4.0.0
+    rev: v4.7.2
     hooks:
       - id: commitizen
       - id: commitizen-branch

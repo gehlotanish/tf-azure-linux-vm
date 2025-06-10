@@ -59,9 +59,15 @@ variable "disable_password_authentication" {
   default     = true
 }
 
+variable "network_interface_name" {
+  type        = string
+  description = "Name for the network interface to be created"
+}
+
 variable "ssh_public_key" {
   description = "SSH public key used for the admin user"
   type        = string
+  default     = null
 }
 
 variable "vm_size" {
@@ -198,7 +204,7 @@ variable "metric_categories" {
 
 variable "logs_destinations_ids" {
   type        = list(string)
-  nullable    = false
+  default     = []
   description = <<EOD
 List of destination resources IDs for logs diagnostic destination.
 Can be `Storage Account`, `Log Analytics Workspace` and `Event Hub`. No more than one of each can be set.
@@ -210,4 +216,10 @@ variable "log_analytics_destination_type" {
   type        = string
   default     = "AzureDiagnostics"
   description = "When set to 'Dedicated' logs sent to a Log Analytics workspace will go into resource specific tables, instead of the legacy AzureDiagnostics table."
+}
+
+variable "additional_network_interface_ids" {
+  description = "Optional list of additional network interface IDs to attach to the VM"
+  type        = list(string)
+  default     = []
 }

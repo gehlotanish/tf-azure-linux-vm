@@ -1,5 +1,5 @@
 resource "azurerm_network_interface" "linux_vm" {
-  name                = "${var.name}-nic"
+  name                = var.network_interface_name
   location            = var.location
   resource_group_name = var.resource_group_name
 
@@ -31,22 +31,25 @@ resource "azurerm_linux_virtual_machine" "linux_vm" {
   admin_username                  = var.admin_username
   admin_password                  = var.admin_password
   disable_password_authentication = var.disable_password_authentication
-  network_interface_ids           = [azurerm_network_interface.linux_vm.id]
+  network_interface_ids           = concat([azurerm_network_interface.linux_vm.id], var.additional_network_interface_ids)
   computer_name                   = var.name
   custom_data                     = var.custom_data
   user_data                       = var.user_data
   zone                            = var.availability_zone
+  provision_vm_agent              = var.provision_vm_agent
+  allow_extension_operations      = var.allow_extension_operations
+  encryption_at_host_enabled      = var.encryption_at_host_enabled
 
-  provision_vm_agent         = var.provision_vm_agent
-  allow_extension_operations = var.allow_extension_operations
-  encryption_at_host_enabled = var.encryption_at_host_enabled
 
-  os_disk {
-    caching                   = var.os_disk.caching
-    storage_account_type      = var.os_disk.storage_account_type
-    name                      = "${var.name}-osdisk"
-    disk_encryption_set_id    = var.os_disk.disk_encryption_set_id
-    write_accelerator_enabled = var.os_disk.write_accelerator_enabled
+  dynamic "os_disk" {
+    for_each = var.os_disk != null ? [1] : []
+    content {
+      caching                   = var.os_disk.caching
+      storage_account_type      = var.os_disk.storage_account_type
+      name                      = "${var.name}-osdisk"
+      disk_encryption_set_id    = var.os_disk.disk_encryption_set_id
+      write_accelerator_enabled = var.os_disk.write_accelerator_enabled
+    }
   }
 
   source_image_reference {
@@ -56,18 +59,28 @@ resource "azurerm_linux_virtual_machine" "linux_vm" {
     version   = var.image.version
   }
 
-  identity {
-    type         = var.identity.type
-    identity_ids = var.identity.identity_ids
+  dynamic "identity" {
+    for_each = var.identity != null ? [1] : []
+    content {
+      type         = var.identity.type
+      identity_ids = var.identity.identity_ids
+    }
   }
 
-  admin_ssh_key {
-    username   = var.admin_username
-    public_key = var.ssh_public_key
+  dynamic "admin_ssh_key" {
+
+    for_each = var.ssh_public_key != null ? [1] : []
+    content {
+      username   = var.admin_username
+      public_key = var.ssh_public_key
+    }
   }
 
-  boot_diagnostics {
-    storage_account_uri = var.boot_diagnostics_storage_uri
+  dynamic "boot_diagnostics" {
+    for_each = var.boot_diagnostics_storage_uri != null ? [1] : []
+    content {
+      storage_account_uri = var.boot_diagnostics_storage_uri
+    }
   }
 
   tags = var.tags
