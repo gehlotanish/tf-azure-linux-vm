@@ -41,15 +41,13 @@ resource "azurerm_linux_virtual_machine" "linux_vm" {
   encryption_at_host_enabled      = var.encryption_at_host_enabled
 
 
-  dynamic "os_disk" {
-    for_each = var.os_disk != null ? [1] : []
-    content {
-      caching                   = var.os_disk.caching
-      storage_account_type      = var.os_disk.storage_account_type
-      name                      = "${var.name}-osdisk"
-      disk_encryption_set_id    = var.os_disk.disk_encryption_set_id
-      write_accelerator_enabled = var.os_disk.write_accelerator_enabled
-    }
+  os_disk {
+
+    caching                   = var.os_disk.caching
+    storage_account_type      = var.os_disk.storage_account_type
+    name                      = "${var.name}-osdisk"
+    disk_encryption_set_id    = var.os_disk.disk_encryption_set_id
+    write_accelerator_enabled = var.os_disk.write_accelerator_enabled
   }
 
   source_image_reference {
